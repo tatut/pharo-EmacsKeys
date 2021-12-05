@@ -91,13 +91,14 @@ EmacsKeys class >> moveBeginningOfLine: editor event: event [
 EmacsKeys class >> moveEndOfLine: editor event: event [
 	| str |
 	str := editor string.
-	(str at: editor caret) ~= Character cr ifTrue:[ 
-	editor moveCursor: [:pos | 
-		(str indexOf: Character cr 
-		     startingAt: (editor caret + 1)
-		     ifAbsent: [ str size ]) ]
-	  forward: true 
-	  specialBlock: [ :pos | pos ]
-	  event: event. 
-	]
+	(editor caret < str size) ifTrue: [  
+		(str at: editor caret) ~= Character cr ifTrue:[ 
+			editor moveCursor: [:pos | 
+			(str indexOf: Character cr 
+		 	    startingAt: (editor caret + 1)
+		  	   ifAbsent: [ str size + 1 ]) ]
+	  		forward: true 
+	  		specialBlock: [ :pos | pos ]
+	  		event: event. 
+	]]
 ]
