@@ -13,7 +13,7 @@ EmacsKeys class >> install [
 	"Install Emacs keys"
 	| installKey |
 	installKey := [ :key :action :description |
-		((KMBuilder keymap: #all) shortcut: #emacs)
+		((KMBuilder keymap: #all) shortcut: action)
   			category: RubSmalltalkEditor name 
   			default: key 
 			do: [ :target :morph :event | 
@@ -24,7 +24,36 @@ EmacsKeys class >> install [
   installKey value: $a ctrl value: #moveBeginningOfLine:event: value: 'ctrl-a for beginning of line'.
   installKey value: $e ctrl value: #moveEndOfLine:event: value: 'ctrl-e for end of line'.
   installKey value: $k ctrl value: #killLine:event: value: 'ctrl-k to kill line'.
+  installKey value: Character space meta value: #justOneSpace:event: value: 'meta-space to replace extra spaces'.
 
+
+]
+
+{ #category : #testing }
+EmacsKeys class >> isWhitespaceCharacter: aCharacter [
+	"check if character is whitespace but not cr"
+	^ (aCharacter = Character space) | (aCharacter = Character tab)
+]
+
+{ #category : #editing }
+EmacsKeys class >> justOneSpace: editor event: event [
+	"Delete all spaces and tabs around caret, leaving only one space."
+	| str c |
+	str := editor string.
+	c := editor caret.
+	(self isWhitespaceCharacter: (str at: c-1)) |
+	 (self isWhitespaceCharacter: (str at: c)) 
+	ifFalse: [ editor addString: ' ' ]
+	ifTrue: [ 
+		| pos1 pos2 |
+		pos1 := c-1.
+		[ self isWhitespaceCharacter: (str at: pos1) ] whileTrue: [ pos1 := pos1 - 1 ].
+		pos2 := c.
+		[ self isWhitespaceCharacter: (str at: pos2) ] whileTrue: [ pos2 := pos2 + 1 ].
+		 editor replaceTextFrom: pos1+1 to: pos2  with: ' '
+	].
+
+	editor unselect
 ]
 
 { #category : #editing }
