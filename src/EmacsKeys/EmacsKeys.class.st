@@ -23,7 +23,26 @@ EmacsKeys class >> install [
 			 
   installKey value: $a ctrl value: #moveBeginningOfLine:event: value: 'ctrl-a for beginning of line'.
   installKey value: $e ctrl value: #moveEndOfLine:event: value: 'ctrl-e for end of line'.
+  installKey value: $k ctrl value: #killLine:event: value: 'ctrl-k to kill line'.
 
+]
+
+{ #category : #editing }
+EmacsKeys class >> killLine: editor event: event [
+	"Kill the rest of the current line. If only whitespace, kills through newline."
+	| str pos1 pos2 eol |
+	str := editor string.
+	pos1 := editor caret.
+	pos2 := str indexOf: Character cr 
+	            startingAt: pos1
+					ifAbsent: str size.
+	eol := str copyFrom: pos1 to: pos2.
+	
+	"if text to kill is only whitespace, kill through to next line"
+	(eol reject: [ :c | ((c = Character space) | (c = Character tab)) not ]) isEmpty 
+	ifTrue: [ pos2 := pos2 + 1 ]. 
+	
+   editor replaceTextFrom: pos1 to: pos2 with: ''. 
 ]
 
 { #category : #moving }
