@@ -8,6 +8,17 @@ Class {
 	#category : #EmacsKeys
 }
 
+{ #category : #editing }
+EmacsKeys class >> backwardKillWord: editor event: event [
+	| str pos |
+	editor caret > 1 ifFalse: [ ^ self ].
+	str := editor string.
+	pos := editor caret - 1.
+	[ (self isWhitespaceOrCR: (str at: pos - 1)) & 
+	  ((self isWhitespaceOrCR: (str at: pos)) not) ] whileFalse: [ pos := pos - 1 ].
+	editor replaceTextFrom: pos to: editor caret with: ''
+]
+
 { #category : #actions }
 EmacsKeys class >> install [
 	"Install Emacs keys"
@@ -25,7 +36,7 @@ EmacsKeys class >> install [
   installKey value: $e ctrl value: #moveEndOfLine:event: value: 'ctrl-e for end of line'.
   installKey value: $k ctrl value: #killLine:event: value: 'ctrl-k to kill line'.
   installKey value: Character space meta value: #justOneSpace:event: value: 'meta-space to replace extra spaces'.
-
+  installKey value: (KeyboardKey backspace ctrl) value: #backwardKillWord:event: value: 'C-backspace to kill word backward'
 
 ]
 
@@ -33,6 +44,12 @@ EmacsKeys class >> install [
 EmacsKeys class >> isWhitespaceCharacter: aCharacter [
 	"check if character is whitespace but not cr"
 	^ (aCharacter = Character space) | (aCharacter = Character tab)
+]
+
+{ #category : #testing }
+EmacsKeys class >> isWhitespaceOrCR: aCharacter [
+	"check if character is whitespace including cr"
+	^ (self isWhitespaceCharacter: aCharacter) | (aCharacter = Character cr)
 ]
 
 { #category : #editing }
